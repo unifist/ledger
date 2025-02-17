@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: ledger
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:6.2.5-alpine
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 6379
+          protocol: TCP
+      - name: exporter
+        image: oliver006/redis_exporter:v1.31.4
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 9121
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis
+  namespace: ledger
+  labels:
+    app: redis
+spec:
+  selector:
+    app: redis
+  type: ClusterIP
+  ports:
+  - name: redis
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 9121

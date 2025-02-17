@@ -1,0 +1,85 @@
+{
+    "fact": {
+        "fields": [
+            {
+                "auto": true,
+                "kind": "int",
+                "name": "id",
+                "none": true,
+                "store": "id"
+            },
+            {
+                "kind": "int",
+                "name": "origin_id",
+                "none": true,
+                "store": "origin_id"
+            },
+            {
+                "kind": "int",
+                "name": "when",
+                "none": true,
+                "store": "when"
+            },
+            {
+                "kind": "dict",
+                "name": "meta",
+                "none": false,
+                "store": "meta"
+            }
+        ],
+        "id": "id",
+        "index": {},
+        "name": "fact",
+        "schema": "ledger",
+        "source": "ledger",
+        "store": "fact",
+        "title": "Fact",
+        "unique": {
+            "origin_id-when": [
+                "origin_id",
+                "when"
+            ]
+        }
+    },
+    "origin": {
+        "fields": [
+            {
+                "auto": true,
+                "kind": "int",
+                "name": "id",
+                "none": true,
+                "store": "id"
+            },
+            {
+                "kind": "str",
+                "name": "name",
+                "none": false,
+                "store": "name"
+            },
+            {
+                "kind": "str",
+                "name": "description",
+                "none": true,
+                "store": "description"
+            },
+            {
+                "kind": "dict",
+                "name": "meta",
+                "none": false,
+                "store": "meta"
+            }
+        ],
+        "id": "id",
+        "index": {},
+        "name": "origin",
+        "schema": "ledger",
+        "source": "ledger",
+        "store": "origin",
+        "title": "Origin",
+        "unique": {
+            "name": [
+                "name"
+            ]
+        }
+    }
+}

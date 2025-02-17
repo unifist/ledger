@@ -1,0 +1,11 @@
+.clickable {
+  cursor: pointer;
+}
+
+/* Large screen and bigger */
+@media (min-width: 1220px) {
+  .uk-container {
+    max-width: 3200px;
+    padding: 0 35px;
+  }
+}

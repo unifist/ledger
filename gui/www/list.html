@@ -1,0 +1,42 @@
+{{#def.Header}}
+<div class="uk-overflow-container">
+    <form class="uk-form">
+        <button type="button" OnClick="DRApp.go('{{! DRApp.current.controller.model.singular }}_create')" class="uk-button uk-button-primary">
+            Create
+        </button>
+        <button type="button" OnClick="DRApp.current.controller.search()" class="uk-button uk-button-primary">
+            Search
+        </button>
+        <input id="like" value="{{!it.like}}" onKeyPress="DRApp.current.controller.like(event)" type="text"/>
+        {{? it.overflow}}
+            <i>Too many results returned. Narrow with Search. </i>
+        {{?}}
+    </form>
+    <table class="uk-table">
+        <thead>
+            <tr>
+{{~DRApp.current.controller.model.list :field}}
+                <th>{{= field }}</th>
+{{~}}
+            </tr>
+        </thead>
+        <tbody>
+{{~it[DRApp.current.controller.model.plural] :model}}
+            <tr
+    {{? DRApp.current.controller.model.id }}
+            OnClick="DRApp.go('{{! DRApp.current.controller.model.singular }}_retrieve','{{=model.id}}')" class="clickable"
+    {{?}}
+            >
+    {{~DRApp.current.controller.model.list :field}}
+        {{?it.formats[field]}}
+                <td>{{=DRApp.format(model[field], it.formats[field].format, it.formats[field].titles)}}</td>
+        {{??}}
+                <td>{{=DRApp.get(model, field)}}</td>
+        {{?}}
+    {{~}}
+            </tr>
+{{~}}
+        </tbody>
+    </table>
+</div>
+{{#def.Footer}}
