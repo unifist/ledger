@@ -78,7 +78,7 @@ class TestDaemon(micro_logger_unittest.TestCase):
 
     @unittest.mock.patch.dict('os.environ', {"K8S_POD": "unit", "SLEEP": "7", "LOG_LEVEL": "INFO"})
     @unittest.mock.patch("micro_logger.getLogger", micro_logger_unittest.MockLogger)
-    @unittest.mock.patch('relations_restx.Source', relations.unittest.MockSource)
+    @unittest.mock.patch('relations_rest.Source', relations.unittest.MockSource)
     @unittest.mock.patch('redis.Redis', MockRedis)
     def setUp(self):
 
@@ -86,7 +86,7 @@ class TestDaemon(micro_logger_unittest.TestCase):
 
     @unittest.mock.patch.dict('os.environ', {"K8S_POD": "test", "SLEEP": "7", "LOG_LEVEL": "INFO"})
     @unittest.mock.patch("micro_logger.getLogger", micro_logger_unittest.MockLogger)
-    @unittest.mock.patch('relations_restx.Source', relations.unittest.MockSource)
+    @unittest.mock.patch('relations_rest.Source', relations.unittest.MockSource)
     @unittest.mock.patch('redis.Redis', MockRedis)
     def test___init__(self):
 
@@ -101,19 +101,19 @@ class TestDaemon(micro_logger_unittest.TestCase):
         self.assertIsInstance(relations.source("ledger"), relations.unittest.MockSource)
 
         self.assertEqual(daemon.redis.host, "redis.ledger")
-        self.assertEqual(daemon.redis.queue["ledger/person"], [])
+        self.assertEqual(daemon.redis.queue["ledger/origin"], [])
 
     def test_process(self):
 
-        self.daemon.redis.queue["ledger/person"].append({})
+        self.daemon.redis.queue["ledger/origin"].append({})
 
         self.daemon.process()
 
-        person = ledger.Person("Tom").create()
-        self.daemon.redis.queue["ledger/person"].append({"person": json.dumps(person.export())})
+        origin = ledger.Origin("Tom").create()
+        self.daemon.redis.queue["ledger/origin"].append({"origin": json.dumps(origin.export())})
 
         self.daemon.process()
-        self.assertLogged(self.daemon.logger, "info", "person", extra={"person": person.export()})
+        self.assertLogged(self.daemon.logger, "info", "origin", extra={"origin": origin.export()})
 
     @unittest.mock.patch('prometheus_client.start_http_server')
     def test_run(self, mock_prom):

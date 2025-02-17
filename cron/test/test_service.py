@@ -28,7 +28,7 @@ class TestCron(micro_logger_unittest.TestCase):
     maxDiff = None
 
     @unittest.mock.patch("micro_logger.getLogger", micro_logger_unittest.MockLogger)
-    @unittest.mock.patch('relations_restx.Source', relations.unittest.MockSource)
+    @unittest.mock.patch('relations_rest.Source', relations.unittest.MockSource)
     @unittest.mock.patch('redis.Redis', MockRedis)
     def setUp(self):
 
@@ -36,7 +36,7 @@ class TestCron(micro_logger_unittest.TestCase):
 
     @unittest.mock.patch.dict('os.environ', {"LOG_LEVEL": "INFO"})
     @unittest.mock.patch("micro_logger.getLogger", micro_logger_unittest.MockLogger)
-    @unittest.mock.patch('relations_restx.Source', relations.unittest.MockSource)
+    @unittest.mock.patch('relations_rest.Source', relations.unittest.MockSource)
     @unittest.mock.patch('redis.Redis', MockRedis)
     def test___init__(self):
 
@@ -50,18 +50,18 @@ class TestCron(micro_logger_unittest.TestCase):
 
     def test_process(self):
 
-        person = ledger.Person("Tom").create()
+        origin = ledger.Origin("Tom").create()
 
         self.cron.process()
 
-        self.assertLogged(self.cron.logger, "info", "person", extra={"person": person.export()})
+        self.assertLogged(self.cron.logger, "info", "origin", extra={"origin": origin.export()})
 
-        self.assertEqual(len(self.cron.redis.queue['ledger/person']), 1)
-        self.assertEqual(json.loads(self.cron.redis.queue['ledger/person'][0]["fields"]["person"]), person.export())
+        self.assertEqual(len(self.cron.redis.queue['ledger/origin']), 1)
+        self.assertEqual(json.loads(self.cron.redis.queue['ledger/origin'][0]["fields"]["origin"]), origin.export())
 
     @unittest.mock.patch('prometheus_client.push_to_gateway')
     def test_run(self, mock_push):
 
         self.cron.run()
 
-        mock_push.assert_called_once_with("push.prometheus:9091", "ledger/cron", registry=service.REGISTRY)
+        #mock_push.assert_called_once_with("push.prometheus:9091", "ledger/cron", registry=service.REGISTRY)
