@@ -107,34 +107,32 @@ pipeline {
             when {
                 branch "main"
             }
-            stages {
-                parallel {
-                    stage('api') {
-                        steps {
-                            dir('api') {
-                                sh 'make push -e VERSION=${VERSION}'
-                            }
+            parallel {
+                stage('api') {
+                    steps {
+                        dir('api') {
+                            sh 'make push -e VERSION=${VERSION}'
                         }
                     }
-                    stage('daemon') {
-                        steps {
-                            dir('daemon') {
-                                sh 'make push -e VERSION=${VERSION}'
-                            }
+                }
+                stage('daemon') {
+                    steps {
+                        dir('daemon') {
+                            sh 'make push -e VERSION=${VERSION}'
                         }
                     }
-                    stage('cron') {
-                        steps {
-                            dir('cron') {
-                                sh 'make push -e VERSION=${VERSION}'
-                            }
+                }
+                stage('cron') {
+                    steps {
+                        dir('cron') {
+                            sh 'make push -e VERSION=${VERSION}'
                         }
                     }
-                    stage('gui') {
-                        steps {
-                            dir('gui') {
-                                sh 'make push -e VERSION=${VERSION}'
-                            }
+                }
+                stage('gui') {
+                    steps {
+                        dir('gui') {
+                            sh 'make push -e VERSION=${VERSION}'
                         }
                     }
                 }
