@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gui
+  namespace: ledger
+  labels:
+    app: gui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gui
+  template:
+    metadata:
+      labels:
+        app: gui
+    spec:
+      containers:
+      - name: gui
+        image: ledger-gui
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          httpGet:
+            path: /api/health
+            port: 80
+        livenessProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          httpGet:
+            path: /api/health
+            port: 80
+      - name: exporter
+        image: nginx/nginx-prometheus-exporter:0.9.0
+        args:
+        - '-nginx.scrape-uri=http://localhost/status'
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: gui
+  namespace: ledger
+  labels:
+    app: gui
+spec:
+  selector:
+    app: gui
+  type: ClusterIP
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 80

@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cron
+  namespace: ledger
+  labels:
+    app: cron
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: cron
+        spec:
+          containers:
+          - name: cron
+            image: ledger-cron
+            imagePullPolicy: Always
+            env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: LOG_LEVEL
+              value: WARNING
+          backoffLimit: 0
+          restartPolicy: Never
+          concurrencyPolicy: Forbid

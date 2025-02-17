@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../base/
+- ../../api/kubernetes/tilt/
+- ../../gui/kubernetes/tilt/
+- ../../daemon/kubernetes/tilt/
+- ../../cron/kubernetes/tilt/
+- ../../redis/kubernetes/tilt/

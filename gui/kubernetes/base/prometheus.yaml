@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gui
+  namespace: ledger
+spec:
+  selector:
+    matchLabels:
+      app: gui
+  endpoints:
+  - port: http
+    interval: 15s
+    honorLabels: true

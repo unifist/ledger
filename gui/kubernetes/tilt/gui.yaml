@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gui
+  namespace: ledger
+spec:
+  template:
+    spec:
+      containers:
+      - name: gui
+        image: ledger-gui
+        imagePullPolicy: Never

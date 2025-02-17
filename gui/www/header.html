@@ -1,0 +1,16 @@
+<div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+    <h3 class="uk-text-center">ledger</h3>
+
+    <nav class="uk-navbar uk-margin-bottom">
+        <ul class="uk-navbar-nav">
+            <li {{? DRApp.current.paths[0] == '' }}class="uk-active"{{?}}>
+                <a href="{{=DRApp.link('home')}}">Home</a>
+            </li>
+{{~ DRApp.models :model}}
+            <li {{? DRApp.current.paths[0] == '{{! model.singular }}' }}class="uk-active"{{?}}>
+                <a href="{{=DRApp.link('{{! model.singular }}_list')}}">{{= model.title }}</a>
+            </li>
+{{~}}
+        </ul>
+    </nav>
+
