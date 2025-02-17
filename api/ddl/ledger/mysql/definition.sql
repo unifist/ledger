@@ -1,10 +1,12 @@
 CREATE TABLE IF NOT EXISTS `ledger`.`fact` (
   `id` BIGINT AUTO_INCREMENT,
   `origin_id` BIGINT,
+  `who` VARCHAR(255) NOT NULL,
   `when` BIGINT,
-  `meta` JSON NOT NULL,
+  `what` JSON NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE `origin_id_when` (`origin_id`,`when`)
+  INDEX `when` (`when`),
+  UNIQUE `origin_id_who` (`origin_id`,`who`)
 );
 
 CREATE TABLE IF NOT EXISTS `ledger`.`origin` (

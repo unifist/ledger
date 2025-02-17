@@ -15,6 +15,12 @@
                 "store": "origin_id"
             },
             {
+                "kind": "str",
+                "name": "who",
+                "none": false,
+                "store": "who"
+            },
+            {
                 "kind": "int",
                 "name": "when",
                 "none": true,
@@ -22,22 +28,26 @@
             },
             {
                 "kind": "dict",
-                "name": "meta",
+                "name": "what",
                 "none": false,
-                "store": "meta"
+                "store": "what"
             }
         ],
         "id": "id",
-        "index": {},
+        "index": {
+            "when": [
+                "when"
+            ]
+        },
         "name": "fact",
         "schema": "ledger",
         "source": "ledger",
         "store": "fact",
         "title": "Fact",
         "unique": {
-            "origin_id-when": [
+            "origin_id-who": [
                 "origin_id",
-                "when"
+                "who"
             ]
         }
     },

@@ -30,7 +30,10 @@ class Fact(Base):
 
     id = int
     origin_id = int
+    who = str
     when = int
-    meta = dict
+    what = dict
+
+    INDEX = "when"
 
 relations.OneToMany(Origin, Fact)

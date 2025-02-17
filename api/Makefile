@@ -1,7 +1,7 @@
 ACCOUNT?=$(shell cat ../ACCOUNT)
 IMAGE=ledger-api
 VERSION?=dev
-NETWORK?=ledger.io
+NETWORK?=$(VERSION)-ledger.io
 MYSQL_IMAGE=mysql/mysql-server:5.7
 MYSQL_HOST=$(IMAGE)-mysql
 DEBUG_PORT=14437

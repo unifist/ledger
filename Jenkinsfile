@@ -100,6 +100,9 @@ pipeline {
             }
         }
         stage('push') {
+            when {
+                branch "main"
+            }
             stages {
                 stage('api') {
                     steps {

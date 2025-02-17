@@ -2,7 +2,7 @@ import unittest
 import unittest.mock
 
 import relations
-import relations_restx.unittest
+import relations.unittest
 
 import service
 import ledger
@@ -14,7 +14,7 @@ if not sys.warnoptions:
     import warnings
     warnings.simplefilter("ignore")
 
-class Testrestx(relations_restx.unittest.TestCase):
+class Testrestx(relations.unittest.TestCase):
 
     @unittest.mock.patch('service.open', create=True)
     def setUp(self, mock_open):
