@@ -136,13 +136,13 @@ class Client:
             if who in facts:
                 continue
 
-            ledger.Fact(
+            id = ledger.Fact(
                 witness_id=witness["id"],
                 who=who,
                 when=time.mktime(datetime.datetime.strptime(summary["summary_end_time"], "%Y-%m-%dT%H:%M:%SZ").timetuple()),
                 what=self.meeting_summary(summary)
-            ).create()
+            ).create().id
 
-        self.daemon.redis.xadd("ledger/fact", fields={"fact": who})
-        self.daemon.logger.info("fact", extra={"fact": who})
-        FACTS.observe(1)
+            self.daemon.logger.info("fact", extra={"fact": {"id": id}})
+            FACTS.observe(1)
+            self.daemon.redis.xadd("ledger/fact", fields={"fact": json.dumps({"id": id})})
