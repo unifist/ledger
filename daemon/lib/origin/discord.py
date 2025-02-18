@@ -15,12 +15,15 @@ import ledger
 WHO = "discord"
 
 class OriginClient(discord.Client):
+    """
+    Discord Client to handel the Discord origin
+    """
 
     daemon = None
     user_ids = []
     witness_ids = {}
 
-    def __init__(self, daemon=daemon, *args, **kwargs):
+    def __init__(self, *args, daemon=daemon, **kwargs):
 
         super(OriginClient, self).__init__(*args, **kwargs)
 
@@ -32,8 +35,11 @@ class OriginClient(discord.Client):
             self.user_ids.append(user_id)
             self.witness_ids[user_id] = witness.id
 
-    @classmethod
-    def user_to_dict(cls, user):
+    @staticmethod
+    def user_to_dict(user):
+        """
+        Converts a user object to a standard dict
+        """
 
         return {
             "id": str(user.id),
@@ -44,6 +50,9 @@ class OriginClient(discord.Client):
 
     @classmethod
     def channel_to_dict(cls, message):
+        """
+        Converts a channel info to a standard dict
+        """
 
         value = {
             "id": str(message.channel.id)
@@ -51,7 +60,7 @@ class OriginClient(discord.Client):
 
         if message.author.dm_channel and message.channel.id == message.author.dm_channel.id:
             value["type"] = "direct"
-            value["recipient"] = cls.user_to_dict(message.channel,recipient)
+            value["recipient"] = cls.user_to_dict(message.channel.recipient)
         elif not message.guild:
             value["type"] = "group"
         else:
@@ -66,6 +75,9 @@ class OriginClient(discord.Client):
 
     @classmethod
     def message_to_dict(cls, message, reference=False):
+        """
+        Converts a message obj to a standard dict, optional including the reply
+        """
 
         value = {
             "id": str(message.id),
@@ -81,18 +93,36 @@ class OriginClient(discord.Client):
 
         return value
 
+    @classmethod
+    def reaction_to_dict(cls, reaction, user):
+        """
+        Converts a reaction and user obj to a standard dict
+        """
+
+        return {
+            "user": cls.user_to_dict(user),
+            "emoji": reaction.emoji,
+            "message": cls.message_to_dict(reaction.message)
+        }
+
     def message_user_ids(self, message):
+        """
+        Gets all the user_ids associated with a message within our list
+        """
 
         if message.author.id in self.user_ids:
             yield message.author.id
         elif message.channel.id == message.author.dm_channel.id:
-            yield message.channel,recipient.id
+            yield message.channel.recipient.id
         else:
             for user in message.mentions:
                 if user.id in self.user_ids:
                     yield user.id
 
     def reaction_user_ids(self, reaction, user):
+        """
+        Gets all the user_ids associated with a reaction within our list
+        """
 
         if user.id in self.user_ids:
             yield user.id
@@ -102,12 +132,16 @@ class OriginClient(discord.Client):
                 yield user_id
 
     async def on_ready(self):
+        """
+        Called when starting up
+        """
 
         self.daemon.logger.info(f"logged in as {self.user}", extra={"id": self.user.id})
 
     async def on_message(self, message):
-
-        # We only look at messages we're allowed to look it
+        """
+        For every message this bot sees
+        """
 
         for user_id in self.message_user_ids(message):
             fact = ledger.Fact(
@@ -122,17 +156,16 @@ class OriginClient(discord.Client):
             self.daemon.redis.xadd("ledger/fact", fields={"fact": json.dumps(fact.export())})
 
     async def on_reaction_add(self, reaction, user):
+        """
+        For every reactino this bot sees
+        """
 
         for user_id in self.reaction_user_ids(reaction, user):
             fact = ledger.Fact(
                 witness_id=self.witness_ids[user_id],
                 who=f"reaction:{reaction.message.id}:{reaction.emoji}",
                 when=time.mktime(reaction.message.created_at.timetuple()),
-                what={
-                    "user": self.user_to_dict(user),
-                    "emoji": reaction.emoji,
-                    "message": self.message_to_dict(reaction.message)
-                }
+                what=self.reaction_to_dict(reaction, user)
             ).create()
 
             self.daemon.logger.info("fact", extra={"fact": {"id": fact.id}})
@@ -148,7 +181,7 @@ def run(daemon):
         token = json.load(creds_file)["token"]
 
     intents = discord.Intents.default()
-    intents.message_content = True
+    intents.message_content = True # pylint: disable=assigning-non-slot
 
     client = OriginClient(daemon=daemon, intents=intents)
     client.run(token)
