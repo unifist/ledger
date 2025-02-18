@@ -33,3 +33,11 @@ spec:
         ports:
         - name: http
           containerPort: 80
+        volumeMounts:
+        - name: secret
+          mountPath: "/opt/service/secret"
+          readOnly: true
+      volumes:
+      - name: secret
+        secret:
+          secretName: secret

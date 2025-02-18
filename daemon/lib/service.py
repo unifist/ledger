@@ -13,6 +13,8 @@ import relations_rest
 
 import prometheus_client
 
+import origin.zoom
+
 PROCESS = prometheus_client.Gauge("process_seconds", "Time to complete a processing task")
 ORIGINS = prometheus_client.Summary("origins_processed", "Origins processed")
 
@@ -20,6 +22,10 @@ class Daemon: # pylint: disable=too-few-public-methods
     """
     Daemon class
     """
+
+    ORIGINS = [
+        origin.zoom
+    ]
 
     def __init__(self):
 
@@ -39,6 +45,10 @@ class Daemon: # pylint: disable=too-few-public-methods
         ):
             self.redis.xgroup_create("ledger/origin", "daemon", mkstream=True)
 
+        for handler in self.ORIGINS:
+            if hasattr(handler, "init"):
+                handler.init(self)
+
     @PROCESS.time()
     def process(self):
         """
@@ -50,9 +60,14 @@ class Daemon: # pylint: disable=too-few-public-methods
         if not message or "origin" not in message[0][1][0][1]:
             return
 
-        origin = json.loads(message[0][1][0][1]["origin"])
-        self.logger.info("origin", extra={"origin": origin})
+        instance = json.loads(message[0][1][0][1]["origin"])
+        self.logger.info("origin", extra={"origin": instance})
         ORIGINS.observe(1)
+
+        for handler in self.ORIGINS:
+            if hasattr(handler, "origin"):
+                handler.origin(self, instance)
+
         self.redis.xack("ledger/origin", "daemon", message[0][1][0][0])
 
     def run(self):
@@ -63,4 +78,9 @@ class Daemon: # pylint: disable=too-few-public-methods
         prometheus_client.start_http_server(80)
 
         while True:
+
             self.process()
+
+            for handler in self.ORIGINS:
+                if hasattr(handler, "process"):
+                    handler.process(self)

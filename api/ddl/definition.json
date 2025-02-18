@@ -1,4 +1,46 @@
 {
+    "entity": {
+        "fields": [
+            {
+                "auto": true,
+                "kind": "int",
+                "name": "id",
+                "none": true,
+                "store": "id"
+            },
+            {
+                "kind": "int",
+                "name": "unum_id",
+                "none": true,
+                "store": "unum_id"
+            },
+            {
+                "kind": "str",
+                "name": "who",
+                "none": false,
+                "store": "who"
+            },
+            {
+                "kind": "dict",
+                "name": "meta",
+                "none": false,
+                "store": "meta"
+            }
+        ],
+        "id": "id",
+        "index": {},
+        "name": "entity",
+        "schema": "ledger",
+        "source": "ledger",
+        "store": "entity",
+        "title": "Entity",
+        "unique": {
+            "unum_id-who": [
+                "unum_id",
+                "who"
+            ]
+        }
+    },
     "fact": {
         "fields": [
             {
@@ -10,9 +52,9 @@
             },
             {
                 "kind": "int",
-                "name": "origin_id",
+                "name": "witness_id",
                 "none": true,
-                "store": "origin_id"
+                "store": "witness_id"
             },
             {
                 "kind": "str",
@@ -31,6 +73,12 @@
                 "name": "what",
                 "none": false,
                 "store": "what"
+            },
+            {
+                "kind": "dict",
+                "name": "meta",
+                "none": false,
+                "store": "meta"
             }
         ],
         "id": "id",
@@ -45,8 +93,8 @@
         "store": "fact",
         "title": "Fact",
         "unique": {
-            "origin_id-who": [
-                "origin_id",
+            "witness_id-who": [
+                "witness_id",
                 "who"
             ]
         }
@@ -62,15 +110,9 @@
             },
             {
                 "kind": "str",
-                "name": "name",
+                "name": "who",
                 "none": false,
-                "store": "name"
-            },
-            {
-                "kind": "str",
-                "name": "description",
-                "none": true,
-                "store": "description"
+                "store": "who"
             },
             {
                 "kind": "dict",
@@ -87,8 +129,92 @@
         "store": "origin",
         "title": "Origin",
         "unique": {
-            "name": [
-                "name"
+            "who": [
+                "who"
+            ]
+        }
+    },
+    "unum": {
+        "fields": [
+            {
+                "auto": true,
+                "kind": "int",
+                "name": "id",
+                "none": true,
+                "store": "id"
+            },
+            {
+                "kind": "str",
+                "name": "who",
+                "none": false,
+                "store": "who"
+            },
+            {
+                "kind": "dict",
+                "name": "meta",
+                "none": false,
+                "store": "meta"
+            }
+        ],
+        "id": "id",
+        "index": {},
+        "name": "unum",
+        "schema": "ledger",
+        "source": "ledger",
+        "store": "unum",
+        "title": "Unum",
+        "unique": {
+            "who": [
+                "who"
+            ]
+        }
+    },
+    "witness": {
+        "fields": [
+            {
+                "auto": true,
+                "kind": "int",
+                "name": "id",
+                "none": true,
+                "store": "id"
+            },
+            {
+                "kind": "int",
+                "name": "entity_id",
+                "none": true,
+                "store": "entity_id"
+            },
+            {
+                "kind": "int",
+                "name": "origin_id",
+                "none": true,
+                "store": "origin_id"
+            },
+            {
+                "kind": "str",
+                "name": "who",
+                "none": false,
+                "store": "who"
+            },
+            {
+                "kind": "dict",
+                "name": "meta",
+                "none": false,
+                "store": "meta"
+            }
+        ],
+        "id": "id",
+        "index": {},
+        "name": "witness",
+        "schema": "ledger",
+        "source": "ledger",
+        "store": "witness",
+        "title": "Witness",
+        "unique": {
+            "entity_id-origin_id-who": [
+                "entity_id",
+                "origin_id",
+                "who"
             ]
         }
     }
