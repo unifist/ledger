@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discord
+  namespace: ledger
+spec:
+  template:
+    spec:
+      containers:
+      - name: discord
+        image: ledger-daemon
+        imagePullPolicy: Never
+        command: ["python", "-m", "ptvsd", "--host", "0.0.0.0", "--port", "5678", "/opt/service/bin/discord_daemon.py"]
+        env:
+        - name: LOG_LEVEL
+          value: INFO
+        ports:
+        - name: debug
+          containerPort: 5678
+          protocol: TCP
