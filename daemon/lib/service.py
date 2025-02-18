@@ -60,13 +60,13 @@ class Daemon: # pylint: disable=too-few-public-methods
         if not message or "origin" not in message[0][1][0][1]:
             return
 
-        origin = json.loads(message[0][1][0][1]["origin"])
-        self.logger.info("origin", extra={"origin": origin})
+        instance = json.loads(message[0][1][0][1]["origin"])
+        self.logger.info("origin", extra={"origin": instance})
         ORIGINS.observe(1)
 
         for handler in self.ORIGINS:
             if hasattr(handler, "origin"):
-                handler.origin(self, origin)
+                handler.origin(self, instance)
 
         self.redis.xack("ledger/origin", "daemon", message[0][1][0][0])
 

@@ -1,3 +1,9 @@
+"""
+Handles everything for the Zoom Origin
+"""
+
+# pylint: disable=unsupported-membership-test
+
 import time
 import datetime
 
@@ -13,6 +19,9 @@ WINTNESSES = prometheus_client.Summary("witnesses_processed", "Witnesses process
 FACTS = prometheus_client.Summary("facts_created", "Facts created")
 
 def init(daemon):
+    """
+    Intialize the daemon for this Origin
+    """
 
     if (
         not daemon.redis.exists("ledger/origin/zoom/witness") or
@@ -21,9 +30,12 @@ def init(daemon):
         daemon.redis.xgroup_create("ledger/origin/zoom/witness", "daemon", mkstream=True)
 
 
-def origin(daemon, origin):
+def origin(daemon, instance):
+    """
+    Handles this Origin
+    """
 
-    for witness in ledger.Witness.many(origin_id=origin["id"]):
+    for witness in ledger.Witness.many(origin_id=instance["id"]):
 
         daemon.logger.info("witness", extra={"witness": witness.export()})
         WINTNESSES.observe(1)
@@ -32,22 +44,28 @@ def origin(daemon, origin):
 
 
 def process(daemon):
+    """
+    Processes this Origin
+    """
 
-        message = daemon.redis.xreadgroup("daemon", daemon.name, {"ledger/origin/zoom/witness": ">"}, count=1, block=1000*daemon.sleep)
+    message = daemon.redis.xreadgroup("daemon", daemon.name, {"ledger/origin/zoom/witness": ">"}, count=1, block=1000*daemon.sleep)
 
-        if not message or "witness" not in message[0][1][0][1]:
-            return
+    if not message or "witness" not in message[0][1][0][1]:
+        return
 
-        witness = json.loads(message[0][1][0][1]["witness"])
-        daemon.logger.info("witness", extra={"witness": witness})
-        WINTNESSES.observe(1)
+    witness = json.loads(message[0][1][0][1]["witness"])
+    daemon.logger.info("witness", extra={"witness": witness})
+    WINTNESSES.observe(1)
 
-        Client(daemon, witness["entity_id"]).witness(witness)
+    Client(daemon, witness["entity_id"]).witness(witness)
 
-        daemon.redis.xack("ledger/origin/zoom/witness", "daemon", message[0][1][0][0])
+    daemon.redis.xack("ledger/origin/zoom/witness", "daemon", message[0][1][0][0])
 
 
 class Client:
+    """
+    Class for interacting with Zoom's API
+    """
 
     WITNESS_BACK = 15*24*60*60 # 15 days back
 
@@ -78,6 +96,9 @@ class Client:
         })
 
     def meeting_summaries(self):
+        """
+        Iterates through all the summaries for this account (sans details)
+        """
 
         response = self.session.get("https://api.zoom.us/v2/meetings/meeting_summaries").json()
 
@@ -95,10 +116,16 @@ class Client:
                 response = None
 
     def meeting_summary(self, summary):
+        """
+        Gets all the details for a summary
+        """
 
         return self.session.get(f"https://api.zoom.us/v2/meetings/{summary['meeting_uuid']}/meeting_summary").json()
 
     def witness(self, witness):
+        """
+        Processes a witness, syncing all the meetings
+        """
 
         facts = ledger.Fact.many(witness_id=witness["id"], when__gt=time.time()-self.WITNESS_BACK)["who"]
 
