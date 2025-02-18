@@ -143,6 +143,6 @@ class Client:
                 what=self.meeting_summary(summary)
             ).create()
 
-        self.daemon.redis.xadd("ledger/origin/zoom/fact", fields={"fact": who})
+        self.daemon.redis.xadd("ledger/fact", fields={"fact": who})
         self.daemon.logger.info("fact", extra={"fact": who})
         FACTS.observe(1)
