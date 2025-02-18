@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discord
+  namespace: ledger
+  labels:
+    app: discord
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discord
+  template:
+    metadata:
+      labels:
+        app: discord
+    spec:
+      containers:
+      - name: discord
+        image: ledger-daemon
+        imagePullPolicy: Always
+        command: ["/opt/service/bin/discord_daemon.py"]
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: LOG_LEVEL
+          value: WARNING
+        - name: SLEEP
+          value: "5"
+        - name: K8S_POD
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        ports:
+        - name: http
+          containerPort: 80
+        volumeMounts:
+        - name: secret
+          mountPath: "/opt/service/secret"
+          readOnly: true
+      volumes:
+      - name: secret
+        secret:
+          secretName: secret

@@ -11,12 +11,10 @@ import json
 import base64
 import requests
 
+import service
 import ledger
 
-import prometheus_client
-
-WINTNESSES = prometheus_client.Summary("witnesses_processed", "Witnesses processed")
-FACTS = prometheus_client.Summary("facts_created", "Facts created")
+WHO = "zoom"
 
 def init(daemon):
     """
@@ -38,7 +36,7 @@ def origin(daemon, instance):
     for witness in ledger.Witness.many(origin_id=instance["id"]):
 
         daemon.logger.info("witness", extra={"witness": witness.export()})
-        WINTNESSES.observe(1)
+        service.WITNESSES.observe(1)
 
         daemon.redis.xadd("ledger/origin/zoom/witness", fields={"witness": json.dumps(witness.export())})
 
@@ -55,7 +53,7 @@ def process(daemon):
 
     witness = json.loads(message[0][1][0][1]["witness"])
     daemon.logger.info("witness", extra={"witness": witness})
-    WINTNESSES.observe(1)
+    service.WITNESSES.observe(1)
 
     Client(daemon, witness["entity_id"]).witness(witness)
 
@@ -136,13 +134,13 @@ class Client:
             if who in facts:
                 continue
 
-            id = ledger.Fact(
+            fact = ledger.Fact(
                 witness_id=witness["id"],
                 who=who,
                 when=time.mktime(datetime.datetime.strptime(summary["summary_end_time"], "%Y-%m-%dT%H:%M:%SZ").timetuple()),
                 what=self.meeting_summary(summary)
-            ).create().id
+            ).create()
 
-            self.daemon.logger.info("fact", extra={"fact": {"id": id}})
-            FACTS.observe(1)
-            self.daemon.redis.xadd("ledger/fact", fields={"fact": json.dumps({"id": id})})
+            self.daemon.logger.info("fact", extra={"fact": {"id": fact.id}})
+            service.FACTS.observe(1)
+            self.daemon.redis.xadd("ledger/fact", fields={"fact": json.dumps(fact.export())})

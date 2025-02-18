@@ -17,6 +17,8 @@ import origin.zoom
 
 PROCESS = prometheus_client.Gauge("process_seconds", "Time to complete a processing task")
 ORIGINS = prometheus_client.Summary("origins_processed", "Origins processed")
+WITNESSES = prometheus_client.Summary("witnesses_processed", "Witnesses processed")
+FACTS = prometheus_client.Summary("facts_created", "Facts created")
 
 class Daemon: # pylint: disable=too-few-public-methods
     """
@@ -65,7 +67,7 @@ class Daemon: # pylint: disable=too-few-public-methods
         ORIGINS.observe(1)
 
         for handler in self.ORIGINS:
-            if hasattr(handler, "origin"):
+            if handler.WHO == instance["who"] and hasattr(handler, "origin"):
                 handler.origin(self, instance)
 
         self.redis.xack("ledger/origin", "daemon", message[0][1][0][0])

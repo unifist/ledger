@@ -4,3 +4,4 @@ resources:
 - ../base/
 patchesStrategicMerge:
 - daemon.yaml
+- discord.yaml
