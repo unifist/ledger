@@ -9,7 +9,6 @@ import json
 
 import discord
 
-import service
 import ledger
 
 WHO = "discord"
@@ -29,7 +28,7 @@ class OriginClient(discord.Client):
 
         self.daemon = daemon
 
-        for witness in ledger.Witness.many(origin__who="discord"):
+        for witness in ledger.Witness.many(origin__who=WHO):
 
             user_id = int(witness.who)
             self.user_ids.append(user_id)
@@ -144,16 +143,12 @@ class OriginClient(discord.Client):
         """
 
         for user_id in self.message_user_ids(message):
-            fact = ledger.Fact(
+            self.daemon.fact(
                 witness_id=self.witness_ids[user_id],
                 who=f"message:{message.id}",
                 when=time.mktime(message.created_at.timetuple()),
                 what=self.message_to_dict(message, reference=True)
-            ).create()
-
-            self.daemon.logger.info("fact", extra={"fact": {"id": fact.id}})
-            service.FACTS.observe(1)
-            self.daemon.redis.xadd("ledger/fact", fields={"fact": json.dumps(fact.export())})
+            )
 
     async def on_reaction_add(self, reaction, user):
         """
@@ -161,16 +156,12 @@ class OriginClient(discord.Client):
         """
 
         for user_id in self.reaction_user_ids(reaction, user):
-            fact = ledger.Fact(
+            self.daemon.fact(
                 witness_id=self.witness_ids[user_id],
                 who=f"reaction:{reaction.message.id}:{reaction.emoji}",
                 when=time.mktime(reaction.message.created_at.timetuple()),
                 what=self.reaction_to_dict(reaction, user)
-            ).create()
-
-            self.daemon.logger.info("fact", extra={"fact": {"id": fact.id}})
-            service.FACTS.observe(1)
-            self.daemon.redis.xadd("ledger/fact", fields={"fact": json.dumps(fact.export())})
+            )
 
 def run(daemon):
     """

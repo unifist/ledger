@@ -67,6 +67,7 @@ class Client:
 
     WITNESS_BACK = 15*24*60*60 # 15 days back
 
+    daemon = None
     session = None
 
     def __init__(self, daemon, entity_id):
@@ -131,16 +132,12 @@ class Client:
 
             who = f"meeting_summary:{summary['meeting_uuid']}"
 
-            if who in facts:
+            if who in facts or ledger.Fact.many(witness_id=witness["id"], who=who).count():
                 continue
 
-            fact = ledger.Fact(
+            self.daemon.fact(
                 witness_id=witness["id"],
                 who=who,
                 when=time.mktime(datetime.datetime.strptime(summary["summary_end_time"], "%Y-%m-%dT%H:%M:%SZ").timetuple()),
                 what=self.meeting_summary(summary)
-            ).create()
-
-            self.daemon.logger.info("fact", extra={"fact": {"id": fact.id}})
-            service.FACTS.observe(1)
-            self.daemon.redis.xadd("ledger/fact", fields={"fact": json.dumps(fact.export())})
+            )

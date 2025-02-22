@@ -13,7 +13,10 @@ import relations_rest
 
 import prometheus_client
 
+import ledger
+
 import origin.zoom
+import origin.bsky
 
 PROCESS = prometheus_client.Gauge("process_seconds", "Time to complete a processing task")
 ORIGINS = prometheus_client.Summary("origins_processed", "Origins processed")
@@ -26,7 +29,8 @@ class Daemon: # pylint: disable=too-few-public-methods
     """
 
     ORIGINS = [
-        origin.zoom
+        origin.zoom,
+        origin.bsky
     ]
 
     def __init__(self):
@@ -50,6 +54,22 @@ class Daemon: # pylint: disable=too-few-public-methods
         for handler in self.ORIGINS:
             if hasattr(handler, "init"):
                 handler.init(self)
+
+
+    def fact(self, **fact):
+        """
+        Creates a fact if needed
+        """
+
+        print(fact)
+
+        fact = ledger.Fact(**fact).create()
+
+        self.logger.info("fact", extra={"fact": {"id": fact.id}})
+        FACTS.observe(1)
+        self.redis.xadd("ledger/fact", fields={"fact": json.dumps(fact.export())})
+
+        return fact
 
     @PROCESS.time()
     def process(self):

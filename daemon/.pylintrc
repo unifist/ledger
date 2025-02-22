@@ -143,7 +143,9 @@ disable=bad-continuation,
         broad-except,
         wrong-import-order,
         invalid-name,
-        redefined-builtin
+        redefined-builtin,
+        duplicate-code,
+        unsupported-membership-test
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
