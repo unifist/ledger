@@ -68,5 +68,6 @@ class Fact(Base):
     meta = dict         # any special weird data
 
     INDEX = "when"
+    ORDER = "-when"
 
 relations.OneToMany(Witness, Fact)
